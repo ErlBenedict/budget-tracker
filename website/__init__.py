@@ -27,6 +27,12 @@ def create_app():
 
     create_database(app)
 
+    # Avoid circular imports with app context
+    with app.app_context():
+        if not path.exists("website/" + DB_NAME):
+            db.create_all()
+            print("Database Created!")
+
     # Flask-Login Configuration
     login_manager = LoginManager()
     login_manager.login_view = 'auth.login'
@@ -42,3 +48,4 @@ def create_database(app):
     if not path.exists('website/' + DB_NAME):
         with app.app_context():
             db.create_all()
+            print('Database Created!')
