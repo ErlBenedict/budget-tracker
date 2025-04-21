@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 {% extends "base.html" %}
 
 {% block title %}Dashboard{% endblock %}
@@ -44,50 +43,3 @@
   </div>
 </div>
 {% endblock %}
-=======
-{% extends "base.html" %}
-
-{% block title %}Dashboard{% endblock %}
-
-{% block content %}
-<div class="container mt-4">
-  <h2>Welcome, {{ user.username }}!</h2>
-
-  <div class="row mt-4">
-    <div class="col-md-4">
-      <div class="card text-bg-primary mb-3">
-        <div class="card-body">
-          <h5 class="card-title">Monthly Budget</h5>
-          <p class="card-text">₱{{ monthly_budget }}</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-4">
-      <div class="card text-bg-success mb-3">
-        <div class="card-body">
-          <h5 class="card-title">Remaining Budget</h5>
-          <p class="card-text">₱{{ remaining_budget }}</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-4">
-      <div class="card text-bg-warning mb-3">
-        <div class="card-body">
-          <h5 class="card-title">Savings</h5>
-          <p class="card-text">₱{{ savings }}</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="text-center mt-4">
-    <a href="{{ url_for('views.add_expense') }}" class="btn btn-outline-primary">Add Expense</a>
-    <a href="{{ url_for('views.view_report') }}" class="btn btn-outline-secondary">View Report</a>
-    <a href="{{ url_for('views.export_csv') }}" class="btn btn-outline-success">Export CSV</a>
-    <a href="{{ url_for('views.export_pdf') }}" class="btn btn-outline-danger">Export PDF</a>
-  </div>
-</div>
-{% endblock %}
->>>>>>> 11087191ba6c9c67c5ba75a139af05d657e2bf97
