@@ -55,20 +55,23 @@ def home():
             new_total_expenses = total_existing_expenses + amount
             excess = new_total_expenses - budget_amount
 
-            if excess <= 0:
+            if budget_amount >= new_total_expenses:
                 # No excess, safe to add
                 new_expense = Expense(user_id=current_user.id, category=category, amount=amount)
                 db.session.add(new_expense)
                 db.session.commit()
                 flash('Expense added successfully!', category='success')
-            else:
-                if savings_amount >= excess:
+            elif budget_amount < new_total_expenses and (budget_amount + savings_amount) >= new_total_expenses:
+                # Need to use savings
+                excess = new_total_expenses - budget_amount
                     # Deduct from savings
-                    savings.amount -= excess
-                    db.session.add(Expense(user_id=current_user.id, category=category, amount=amount))
-                    db.session.commit()
-                    flash(f'Your expense exceeded the budget by ₱{excess:.2f}, which was deducted from your savings.', category='warning')
-                else:
+                savings.amount -= excess
+
+                new_expense = Expense(user_id=current_user.id, category=category, amount=amount)
+                db.session.add(new_expense)
+                db.session.commit()
+                flash(f'Your expense exceeded the budget by ₱{excess:.2f}, which was deducted from your savings.', category='warning')
+            else:
                     flash('Your monthly budget and savings are not enough to cover this expense.', category='error')
                     return redirect('/')
                 
@@ -100,9 +103,7 @@ def home():
 
     remaining_budget = budget_amount - total_expenses
     if remaining_budget <= 0:
-        excess = abs(remaining_budget)
-        if savings and savings.amount >= abs(remaining_budget):
-            remaining_budget = 0
+        remaining_budget = 0
 
 
     # Expense summary by category for chart
