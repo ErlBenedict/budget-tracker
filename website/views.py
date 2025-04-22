@@ -56,24 +56,26 @@ def home():
             excess = new_total_expenses - budget_amount
 
             if budget_amount >= new_total_expenses:
-                # No excess, safe to add
+                # Budget covers everything
                 new_expense = Expense(user_id=current_user.id, category=category, amount=amount)
                 db.session.add(new_expense)
                 db.session.commit()
                 flash('Expense added successfully!', category='success')
+
             elif budget_amount < new_total_expenses and (budget_amount + savings_amount) >= new_total_expenses:
                 # Need to use savings
                 excess = new_total_expenses - budget_amount
-                    # Deduct from savings
                 savings.amount -= excess
 
                 new_expense = Expense(user_id=current_user.id, category=category, amount=amount)
                 db.session.add(new_expense)
                 db.session.commit()
                 flash(f'Your expense exceeded the budget by ₱{excess:.2f}, which was deducted from your savings.', category='warning')
+
             else:
-                    flash('Your monthly budget and savings are not enough to cover this expense.', category='error')
-                    return redirect('/')
+                flash('Your monthly budget and savings are not enough to cover this expense.', category='error')
+                return redirect('/')
+
                 
             return redirect('/')
         
@@ -102,7 +104,7 @@ def home():
     budget_amount = budget.amount if budget else 0
 
     remaining_budget = budget_amount - total_expenses
-    if remaining_budget <= 0:
+    if remaining_budget < 0:
         remaining_budget = 0
 
 
