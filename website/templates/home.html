@@ -10,9 +10,14 @@
             <input type="number" step="0.01" name="budget" placeholder="Monthly Budget (₱)" required class="p-2 border rounded mb-2 w-full" />
             <button type="submit" class="btn btn-success mb-3-600 text-white px-7 py-7 rounded">Save Budget</button>
         </form>
-        <form action="{{ url_for('views.reset_budget') }}" method="POST">
+        <form action="{{ url_for('views.reset_budget') }}" method="POST" onsubmit="return confirmReset()">
             <button type="submit" class="btn btn-danger">Reset Budget & Savings</button>
         </form>
+        <script>
+            function confirmReset() {
+                return confirm("Are you sure you want to reset your monthly budget and savings? This cannot be undone.");
+            }
+        </script>
     </div>
 
     
