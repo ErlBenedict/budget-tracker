@@ -45,7 +45,7 @@ def home():
 
             if category == 'Others' and custom_category:
                 category = custom_category.strip()
-                
+
             budget = Budget.query.filter_by(user_id=current_user.id, month=current_month, year=current_year).first()
             budget_amount = budget.amount if budget else 0
 
@@ -151,11 +151,26 @@ def report():
 @views.route('/reset', methods=['POST'])
 @login_required
 def reset_budget():
-    current_user.monthly_budget = 0
-    current_user.savings = 0
+    from datetime import datetime
+
+    current_month = datetime.now().strftime('%B')
+    current_year = datetime.now().year
+    savings_month = f"{current_month} {current_year}"
+
+    # Delete budget entry for current month
+    budget = Budget.query.filter_by(user_id=current_user.id, month=current_month, year=current_year).first()
+    if budget:
+        db.session.delete(budget)
+
+    # Delete savings entry for current month
+    savings = Savings.query.filter_by(user_id=current_user.id, month=savings_month).first()
+    if savings:
+        db.session.delete(savings)
+
     db.session.commit()
     flash('Budget and savings reset successfully!', category='success')
     return redirect(url_for('views.home'))
+
 
 @views.route('/set-budget', methods=['POST'])
 @login_required
