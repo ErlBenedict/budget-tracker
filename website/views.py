@@ -41,7 +41,11 @@ def home():
         if 'expense_amount' in request.form:
             amount = float(request.form['expense_amount'])
             category = request.form.get('category')
+            custom_category = request.form.get('custom_category')
 
+            if category == 'Others' and custom_category:
+                category = custom_category.strip()
+                
             budget = Budget.query.filter_by(user_id=current_user.id, month=current_month, year=current_year).first()
             budget_amount = budget.amount if budget else 0
 
@@ -144,6 +148,15 @@ def report():
 
     return render_template("report.html", user=current_user, grouped_expenses=grouped_expenses)    
  
+@views.route('/reset', methods=['POST'])
+@login_required
+def reset_budget():
+    current_user.monthly_budget = 0
+    current_user.savings = 0
+    db.session.commit()
+    flash('Budget and savings reset successfully!', category='success')
+    return redirect(url_for('views.home'))
+
 @views.route('/set-budget', methods=['POST'])
 @login_required
 def set_budget():
