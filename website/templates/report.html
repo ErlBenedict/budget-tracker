@@ -7,16 +7,21 @@
 {% if grouped_expenses %}
   {% for date, expenses in grouped_expenses.items() %}
     <div class="card mt-4">
-      <div class="card-header bg-info text-white">
-        {{ date }}
+      <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+        <span>{{ date }}</span>
+        <small>{{ percentage_by_day[date] }}% of total expenses</small>
       </div>
       <ul class="list-group list-group-flush">
         {% for expense in expenses %}
           <li class="list-group-item d-flex justify-content-between">
             <span>{{ expense.category }}</span>
-            <strong>₱{{ expense.amount }}</strong>
+            <strong>₱{{ "%.2f"|format(expense.amount) }}</strong>
           </li>
         {% endfor %}
+        <li class="list-group-item d-flex justify-content-between font-weight-bold">
+          <span>Total for the day:</span>
+          <span>₱{{ "%.2f"|format(expenses|map(attribute='amount')|sum) }}</span>
+        </li>
       </ul>
     </div>
   {% endfor %}
