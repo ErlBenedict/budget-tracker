@@ -29,6 +29,8 @@ def export_csv():
 @login_required
 def home():
     from datetime import datetime
+    from collections import defaultdict
+
 
     # ✅ Set date/time variables once, used across logic
     
@@ -117,6 +119,19 @@ def home():
     for expense in expenses:
         summary[expense.category] = summary.get(expense.category, 0) + expense.amount
 
+    # Group expenses by day
+    grouped_expenses = defaultdict(list)
+    for expense in expenses:
+        date_str = expense.date.strftime('%Y-%m-%d')
+        grouped_expenses[date_str].append(expense)
+
+    # Calculate percentage per day
+    percentage_by_day = {}
+    for date, exps in grouped_expenses.items():
+        daily_total = sum(e.amount for e in exps)
+        percentage = (daily_total / total_expenses) * 100 if total_expenses > 0 else 0
+        percentage_by_day[date] = round(percentage, 2)
+
     return render_template(
         "home.html",
         user=current_user,
@@ -127,7 +142,9 @@ def home():
         savings=savings_amount,
         remaining_budget=remaining_budget,
         current_month=current_month,
-        summary_json=json.dumps(summary)
+        summary_json=json.dumps(summary),
+        grouped_expenses=grouped_expenses,
+        percentage_by_day=percentage_by_day
     )
 
 
