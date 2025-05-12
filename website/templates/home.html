@@ -87,6 +87,13 @@
         <h3 class="font-semibold text-lg mb-2">Expense Breakdown</h3>
         <canvas id="expenseChart"></canvas>
     </div>
+    <script type="application/json" id="summaryData">{{ summary_json | safe }}</script>
+
+    <!-- Chart + Custom Category Toggle -->
+    <script>
+        // Chart.js code as shown above
+    </script>
+    
     <h3 class="mt-4 mb-3 font-semibold text-lg">📅 Day-by-Day Expense Breakdown (as % of total)</h3>
 
     {% for date, expenses in grouped_expenses.items() %}
@@ -111,21 +118,46 @@
 {% endfor %}
 
 <!-- Chart.js -->
+<script type="application/json" id="summaryData">{{ summary_json | safe }}</script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     const ctx = document.getElementById('expenseChart').getContext('2d');
-    const data = JSON.parse('{{ summary_json | safe }}');
+    const data = JSON.parse(document.getElementById('summaryData').textContent);
 
-    const chart = new Chart(ctx, {
+    const labels = Object.keys(data);
+    const amounts = Object.values(data);
+    const total = amounts.reduce((acc, val) => acc + val, 0);
+
+    new Chart(ctx, {
         type: 'pie',
         data: {
-            labels: Object.keys(data),
+            labels: labels,
             datasets: [{
                 label: 'Expense Breakdown',
-                data: Object.values(data),
+                data: amounts,
                 backgroundColor: ['#f87171', '#60a5fa', '#34d399', '#fbbf24', '#c084fc'],
             }]
         },
+        options: {
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            const value = context.parsed;
+                            const percent = ((value / total) * 100).toFixed(2);
+                            return `${context.label}: ₱${value} (${percent}%)`;
+                        }
+                    }
+                },
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        boxWidth: 20,
+                        padding: 15
+                    }
+                }
+            }
+        }
     });
 function toggleCustomCategory() {
     const categorySelect = document.getElementById("category");
