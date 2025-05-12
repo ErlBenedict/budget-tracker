@@ -1,7 +1,11 @@
 from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for
+from flask import make_response
+from weasyprint import HTML
+from jinja2 import Template
 from flask_login import login_required, current_user
 from .models import Expense, Budget, Savings
 from . import db
+import io
 import json
 import csv
 from io import StringIO
@@ -174,6 +178,47 @@ def report():
 
     return render_template("report.html", user=current_user, grouped_expenses=grouped_expenses, percentage_by_day=percentage_by_day, total_expenses=total_expenses)    
  
+@views.route('/download_report')
+@login_required
+def download_report():
+    from datetime import datetime
+
+    now = datetime.now()
+    current_month = now.strftime("%B")
+    current_year = now.year
+
+    # Fetch data
+    expenses = Expense.query.filter_by(user_id=current_user.id).all()
+    savings = Savings.query.filter_by(user_id=current_user.id, month=f"{current_month} {current_year}").first()
+    savings_amount = savings.amount if savings else 0.0
+
+    budget = Budget.query.filter_by(user_id=current_user.id, month=current_month, year=current_year).first()
+    budget_amount = budget.amount if budget else 0.0
+
+    total_expenses = sum(e.amount for e in expenses)
+
+    # Calculate how much of the savings was used
+    used_savings = max(0, total_expenses - budget_amount)
+
+    # Prepare the HTML receipt template
+    html_template = render_template("pdf_receipt.html",
+                                    user=current_user,
+                                    expenses=expenses,
+                                    total_expenses=total_expenses,
+                                    budget_amount=budget_amount,
+                                    used_savings=used_savings,
+                                    savings_remaining=savings_amount,
+                                    now=now)
+    pdf = HTML(string=html_template).write_pdf()
+
+    # Serve PDF
+    response = make_response(pdf)
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = 'inline; filename=Expenses_Report.pdf'
+    return response
+
+
+
 @views.route('/reset', methods=['POST'])
 @login_required
 def reset_budget():
