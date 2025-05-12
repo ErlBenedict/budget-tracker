@@ -1,11 +1,14 @@
 from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for
 from flask import make_response
+from flask import send_file
 from weasyprint import HTML
 from jinja2 import Template
 from flask_login import login_required, current_user
 from .models import Expense, Budget, Savings
 from . import db
 import io
+import pdfkit
+import tempfile
 import json
 import csv
 from io import StringIO
@@ -201,7 +204,7 @@ def download_report():
     used_savings = max(0, total_expenses - budget_amount)
 
     # Prepare the HTML receipt template
-    html_template = render_template("pdf_receipt.html",
+    rendered = render_template("pdf_receipt.html",
                                     user=current_user,
                                     expenses=expenses,
                                     total_expenses=total_expenses,
@@ -209,13 +212,14 @@ def download_report():
                                     used_savings=used_savings,
                                     savings_remaining=savings_amount,
                                     now=now)
-    pdf = HTML(string=html_template).write_pdf()
+    
+    # Set path to wkhtmltopdf binary
+    config = pdfkit.configuration(wkhtmltopdf=r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe')
 
-    # Serve PDF
-    response = make_response(pdf)
-    response.headers['Content-Type'] = 'application/pdf'
-    response.headers['Content-Disposition'] = 'inline; filename=Expenses_Report.pdf'
-    return response
+    # Create temporary PDF file
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as f:
+        pdfkit.from_string(rendered, f.name, configuration=config)
+        return send_file(f.name, as_attachment=True, download_name='Expenses_Report.pdf')
 
 
 
