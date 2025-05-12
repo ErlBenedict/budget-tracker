@@ -87,7 +87,28 @@
         <h3 class="font-semibold text-lg mb-2">Expense Breakdown</h3>
         <canvas id="expenseChart"></canvas>
     </div>
-</div>
+    <h3 class="mt-4 mb-3 font-semibold text-lg">📅 Day-by-Day Expense Breakdown (as % of total)</h3>
+
+    {% for date, expenses in grouped_expenses.items() %}
+    <div class="bg-white rounded-xl shadow p-4 mb-4">
+        <div class="flex justify-between mb-2">
+            <strong>{{ date }}</strong>
+            <span class="text-sm text-gray-600">{{ percentage_by_day[date] }}% of total expenses</span>
+        </div>
+        <ul>
+            {% for expense in expenses %}
+                <li class="flex justify-between border-b py-1">
+                    <span>{{ expense.category }}</span>
+                    <span>₱{{ "%.2f"|format(expense.amount) }}</span>
+                </li>
+            {% endfor %}
+            <li class="flex justify-between font-semibold pt-2">
+                <span>Total:</span>
+                <span>₱{{ "%.2f"|format(expenses|map(attribute='amount')|sum) }}</span>
+            </li>
+        </ul>
+    </div>
+{% endfor %}
 
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
