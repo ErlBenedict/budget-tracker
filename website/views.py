@@ -1,7 +1,6 @@
 from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for
 from flask import make_response
 from flask import send_file
-from weasyprint import HTML
 from jinja2 import Template
 from flask_login import login_required, current_user
 from .models import Expense, Budget, Savings
