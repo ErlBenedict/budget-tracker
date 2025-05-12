@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 12px; margin: 30px; }
+        .header { text-align: center; }
+        .header h2 { margin-bottom: 0; }
+        .divider { border-top: 1px dashed #333; margin: 10px 0; }
+        .content { margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { text-align: left; padding: 6px; }
+        .total { font-weight: bold; border-top: 1px solid #333; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>Budget Tracker Official Receipt</h2>
+        <p>{{ now.strftime('%B %d, %Y %I:%M %p') }}</p>
+        <div class="divider"></div>
+        <p><strong>Name:</strong> {{ user.first_name }} {{ user.last_name }}<br>
+        <strong>Email:</strong> {{ user.email }}</p>
+    </div>
+
+    <div class="content">
+        <h3>Expenses</h3>
+        <table>
+            <tr>
+                <th>Date</th>
+                <th>Category</th>
+                <th>Amount (₱)</th>
+            </tr>
+            {% for expense in expenses %}
+            <tr>
+                <td>{{ expense.timestamp.strftime('%Y-%m-%d %I:%M %p') if expense.timestamp else 'N/A' }}</td>
+                <td>{{ expense.category }}</td>
+                <td>₱{{ '%.2f'|format(expense.amount) }}</td>
+            </tr>
+            {% endfor %}
+            <tr class="total">
+                <td colspan="2">Total Expenses:</td>
+                <td>₱{{ '%.2f'|format(total_expenses) }}</td>
+            </tr>
+            <tr>
+                <td colspan="2">Monthly Budget:</td>
+                <td>₱{{ '%.2f'|format(budget_amount) }}</td>
+            </tr>
+            <tr>
+                <td colspan="2">Savings Used:</td>
+                <td>₱{{ '%.2f'|format(used_savings) }}</td>
+            </tr>
+            <tr>
+                <td colspan="2">Remaining Savings:</td>
+                <td>₱{{ '%.2f'|format(savings_remaining) }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="divider"></div>
+    <p style="text-align:center;">Thank you for using Budget Tracker</p>
+</body>
+</html>
