@@ -6,6 +6,7 @@ from flask_login import login_required, current_user
 from .models import Expense, Budget, Savings
 from . import db
 import io
+import os
 import pdfkit
 import tempfile
 import json
@@ -15,7 +16,7 @@ from flask import Response
 from datetime import datetime
 
 views = Blueprint('views', __name__)
- 
+
 @views.route('/export_csv')
 @login_required
 def export_csv():
@@ -212,13 +213,16 @@ def download_report():
                                     savings_remaining=savings_amount,
                                     now=now)
     
-    # Set path to wkhtmltopdf binary
-    config = pdfkit.configuration(wkhtmltopdf=r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe')
+    # Use bundled Linux binary
+    path_wkhtmltopdf = os.path.join(os.getcwd(), 'website', 'bin', 'wkhtmltopdf')
+    config = pdfkit.configuration(wkhtmltopdf=path_wkhtmltopdf)
 
-    # Create temporary PDF file
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as f:
-        pdfkit.from_string(rendered, f.name, configuration=config)
-        return send_file(f.name, as_attachment=True, download_name='Expenses_Report.pdf')
+    pdf = pdfkit.from_string(rendered, False, configuration=config)
+
+    response = make_response(pdf)
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = 'inline; filename=Budget_Tracker_Report.pdf'
+    return response
 
 
 
